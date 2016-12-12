@@ -90,8 +90,8 @@ app.factory('posts', ['$http', 'auth', function($http, auth){
   };
 
   o.upvoteComment = function(post, comment) {
-  return $http.put('/posts/' + post._id + '/comments/'+ comment._id + '/upvote', null, {
-    headers: {Authorization: 'Bearer '+auth.getToken()}
+  return $http.put('/posts/' + post._id + '/comments/' + comment._id + '/upvote', null, {
+    headers: {Authorization: 'Bearer ' + auth.getToken()}
   }).success(function(data){
     comment.upvotes += 1;
   });
@@ -156,7 +156,7 @@ app.controller('MainCtrl', [
 'auth',
 function($scope, posts, auth){
   $scope.isLoggedIn = auth.isLoggedIn;
-  $scope.posts = posts.post;
+  $scope.posts = posts.posts;
 
 $scope.addPost = function(){
   if(!$scope.title || $scope.title === '') { return; }
