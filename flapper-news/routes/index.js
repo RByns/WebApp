@@ -124,7 +124,13 @@ router.post('/register', function(req, res, next){
   user.setPassword(req.body.password)
 
   user.save(function (err){
-    if(err){ return next(err); }
+    if(err){
+      if (err.name === 'MongoError' && err.code === 11000) {
+                    //Duplicate username
+                    return res.status(500).send({success: false, message: 'User already exists'});
+                  }
+                  return res.status(500).send(err);
+                 }
 
     return res.json({token: user.generateJWT()})
   });
