@@ -8,6 +8,30 @@ var User = mongoose.model('User');
 var jwt = require('express-jwt');
 var auth = jwt({secret: 'SECRET', userProperty: 'payload'});
 
+router.param('post', function(req, res, next, id) {
+  var query = Post.findById(id);
+
+  query.exec(function (err, post){
+    if (err) { return next(err); }
+    if (!post) { return next(new Error('can\'t find post')); }
+
+    req.post = post;
+    return next();
+  });
+});
+
+router.param('comment', function(req, res, next, id) {
+  var query = Comment.findById(id);
+
+  query.exec(function (err, comment){
+    if (err) { return next(err); }
+    if (!comment) { return next(new Error("can't find comment")); }
+
+    req.comment = comment;
+    return next();
+  });
+});
+
 router.get('/posts', function(req, res, next) {
   Post.find(function(err, posts){
     if(err){ return next(err); }
@@ -24,18 +48,6 @@ router.post('/posts', auth, function(req, res, next) {
     if(err){ return next(err); }
 
     res.json(post);
-  });
-});
-
-router.param('post', function(req, res, next, id) {
-  var query = Post.findById(id);
-
-  query.exec(function (err, post){
-    if (err) { return next(err); }
-    if (!post) { return next(new Error('can\'t find post')); }
-
-    req.post = post;
-    return next();
   });
 });
 
@@ -75,6 +87,8 @@ router.post('/posts/:post/comments', auth, function(req, res, next) {
     });
   });
 });
+
+
 
 router.put('/posts/:post/comments/:comment/upvote', auth, function (req, res, next) {
     req.comment.upvote(function (err, comment) {
