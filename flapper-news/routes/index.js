@@ -67,6 +67,21 @@ router.get('/posts/:post', function(req, res) {
   res.json(req.post);
 });
 
+router.delete('/posts/:post', auth, function(req, res, next){
+  if (req.post.author != req.payload.username){
+    return res.status(500).json({message: 'You can only delete your own posts!'});
+  }
+   /**req.comment.remove({post, req.post}, function(err){
+    if (err) { return return next(err);}
+  });
+  **/
+  req.post.remove(function(err, post){
+    if (err) { return next(err); }
+
+    res.send("success");
+  });
+});
+
 router.put('/posts/:post/upvote', auth, function(req, res, next) {
   if (req.post.author == req.payload.username){
     return res.status(500).json({message: 'You can not upvote your own post!'});
@@ -110,6 +125,19 @@ router.post('/posts/:post/comments', auth, function(req, res, next) {
   });
 });
 
+router.delete('/posts/:post/comments/:comment', auth, function (req,res,next){
+if (req.comment.author != req.payload.username){
+    return res.status(500).json({message: 'You can only delete your own comments!'});
+}
+  req.post.comments.splice(req.post.comments.indexOf(req.comments), 1);
+  req.post.save(function(err, post){
+    if (err){return res.status(500).send(err); }
+    req.comment.remove(function(err){
+      if (err){return next(err);}
+      res.send("success");
+    });
+  });
+});
 
 
 router.put('/posts/:post/comments/:comment/upvote', auth, function (req, res, next) {

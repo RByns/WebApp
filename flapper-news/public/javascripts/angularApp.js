@@ -85,6 +85,20 @@ app.factory('posts', ['$http', 'auth', function($http, auth){
     });
   };
 
+  o.deletePost = function(post){
+    return $http.delete('/posts/' + post._id, {
+      headers: {Authorization: 'Bearer '+ auth.getToken()}
+    }).success(function(){
+      posts.splice(posts.indexOf(post), 1);
+    });
+  };
+
+  o.deleteComment = function(post, comment) {
+    return $http.delete('/posts/' + post._id + '/comments/' + comment._id, {
+      headers: {Authorization: 'Bearer '+auth.getToken()}
+    });
+  };
+
   o.get = function(id) {
   return $http.get('/posts/' + id).then(function(res){
     return res.data;
@@ -186,18 +200,26 @@ $scope.addPost = function(){
   $scope.title = '';
   $scope.link = '';
 };
-$scope.incrementUpvotes = function(post) {
+$scope.incrementUpvotes = function(post){
   posts.upvote(post).error(function(error){
     $scope.error = error;
   });
 };
-$scope.decrementUpvotes = function(post) {
+$scope.decrementUpvotes = function(post){
   posts.downvote(post).error(function(error){
     $scope.error = error;
   });
 };
-}
-]);
+$scope.deletePost = function(post){
+  posts.deletePost(post).error(function(error){
+    $scope.error = error;
+  });
+};
+$scope.showDeletePost = function(post){
+  post.author._id == auth.currentUserId();
+};
+
+}]);
 
 app.controller('PostsCtrl', [
 '$scope',
@@ -229,8 +251,18 @@ $scope.decrementUpvotes = function(comment){
     $scope.error = error;
   });
 };
-}
-]);
+$scope.deleteComment = function(comment){
+  posts.deleteComment(post, comment).error(function(error){
+    $scope.error = error;
+  }).success(function(){
+    post.comments.splice(post.comments.indexOf(comment), 1);
+  });
+};
+$scope.showDeleteComment = function(post){
+  post.author._id == auth.currentUserId();
+};
+
+}]);
 
 app.controller('AuthCtrl', [
 '$scope',
