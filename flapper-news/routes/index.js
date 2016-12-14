@@ -64,6 +64,7 @@ router.get('/posts/:post', function(req, res) {
 });
 
 router.put('/posts/:post/upvote', auth, function(req, res, next) {
+
   req.post.upvote(function(err, post){
     if (err) { return next(err); }
 
@@ -84,8 +85,12 @@ router.post('/posts/:post/comments', auth, function(req, res, next) {
   comment.post = req.post;
   comment.author = req.payload.username;
 
-  comment.save(function(err, comment){
-    if(err){ return next(err); }
+  if(!comment.body){
+    return res.status(400).json({message: 'Please fill out your comment before posting'});
+  }
+
+    comment.save(function(err, comment){
+      if(err){ return next(err); }
 
     req.post.comments.push(comment);
     req.post.save(function(err, post) {
@@ -99,8 +104,15 @@ router.post('/posts/:post/comments', auth, function(req, res, next) {
 
 
 router.put('/posts/:post/comments/:comment/upvote', auth, function (req, res, next) {
+  //comment.author = req.payload.username;
+
+  if (req.comment.author == req.payload.username){
+    return res.status(500).json({message: 'You can not upvote your own comment!'});
+  }
     req.comment.upvote(function (err, comment) {
-              if (err) { return next(err); }
+              if (err) {
+                return res.status(500).send(err);
+              }
         res.json(comment);
     });
 });

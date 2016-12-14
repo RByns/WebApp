@@ -213,7 +213,9 @@ function($scope, posts, post, auth){
  $scope.body = '';
 };
 $scope.incrementUpvotes = function(comment){
-  posts.upvoteComment(post, comment);
+    posts.upvoteComment(post, comment).error(function(error){
+      $scope.error = error;
+    });
 };
 $scope.decrementUpvotes = function(comment){
   posts.downvoteComment(post, comment);
