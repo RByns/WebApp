@@ -44,6 +44,10 @@ router.post('/posts', auth, function(req, res, next) {
   var post = new Post(req.body);
   post.author = req.payload.username;
 
+  if(!post.title || !post.link){
+    return res.status(400).json({message: 'Please fill out the name and url before posting'});
+  }
+
   post.save(function(err, post){
     if(err){ return next(err); }
 
@@ -64,7 +68,9 @@ router.get('/posts/:post', function(req, res) {
 });
 
 router.put('/posts/:post/upvote', auth, function(req, res, next) {
-
+  if (req.post.author == req.payload.username){
+    return res.status(500).json({message: 'You can not upvote your own post!'});
+  }
   req.post.upvote(function(err, post){
     if (err) { return next(err); }
 
@@ -73,6 +79,9 @@ router.put('/posts/:post/upvote', auth, function(req, res, next) {
 });
 
 router.put('/posts/:post/downvote', auth, function(req, res, next) {
+  if (req.post.author == req.payload.username){
+    return res.status(500).json({message: 'Why would you want to downvote your own post?'});
+  }
   req.post.downvote(function(err, post){
     if (err) { return next(err); }
 
@@ -104,8 +113,6 @@ router.post('/posts/:post/comments', auth, function(req, res, next) {
 
 
 router.put('/posts/:post/comments/:comment/upvote', auth, function (req, res, next) {
-  //comment.author = req.payload.username;
-
   if (req.comment.author == req.payload.username){
     return res.status(500).json({message: 'You can not upvote your own comment!'});
   }
@@ -118,8 +125,12 @@ router.put('/posts/:post/comments/:comment/upvote', auth, function (req, res, ne
 });
 
 router.put('/posts/:post/comments/:comment/downvote', auth, function (req, res, next) {
+  if (req.comment.author == req.payload.username){
+    return res.status(500).json({message: 'Why would you want to downvote your own comment?'});
+  }
     req.comment.downvote(function (err, comment) {
-              if (err) { return next(err); }
+              if (err) {
+                return res.status(500).send(err); }
         res.json(comment);
     });
 });

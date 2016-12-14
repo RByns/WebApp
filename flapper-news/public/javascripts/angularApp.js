@@ -176,19 +176,25 @@ function($scope, posts, auth){
   $scope.posts = posts.posts;
 
 $scope.addPost = function(){
-  if(!$scope.title || $scope.title === '') { return; }
   posts.create({
     title: $scope.title,
     link: $scope.link,
+    author: 'user',
+  }).error(function(error){
+    $scope.error = error;
   });
   $scope.title = '';
   $scope.link = '';
 };
 $scope.incrementUpvotes = function(post) {
-  posts.upvote(post);
+  posts.upvote(post).error(function(error){
+    $scope.error = error;
+  });
 };
 $scope.decrementUpvotes = function(post) {
-  posts.downvote(post);
+  posts.downvote(post).error(function(error){
+    $scope.error = error;
+  });
 };
 }
 ]);
@@ -203,10 +209,11 @@ function($scope, posts, post, auth){
   $scope.post = post;
 
   $scope.addComment = function(){
-  if($scope.body === '') { return; }
   posts.addComment(post._id, {
    body: $scope.body,
    author: 'user',
+ }).error(function(error){
+   $scope.error = error;
  }).success(function(comment) {
    $scope.post.comments.push(comment);
  });
@@ -218,7 +225,9 @@ $scope.incrementUpvotes = function(comment){
     });
 };
 $scope.decrementUpvotes = function(comment){
-  posts.downvoteComment(post, comment);
+  posts.downvoteComment(post, comment).error(function(error){
+    $scope.error = error;
+  });
 };
 }
 ]);
